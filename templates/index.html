@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Notes</title>
+
+<style>
+@import url('[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap)');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: 
+        radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.12), transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(244, 114, 182, 0.1), transparent 50%),
+        radial-gradient(ellipse at center, rgba(14, 165, 233, 0.06), transparent 70%),
+        #f8fafc;
+    color: #1e293b;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+/* MAIN LAYOUT */
+.app {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    height: 100vh;
+    gap: 30px;
+    padding: 24px;
+}
+
+/* LEFT SIDEBAR */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: 700;
+    padding: 18px 22px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(244, 114, 182, 0.1));
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    box-shadow: 
+        0 8px 32px rgba(99, 102, 241, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.logo span {
+    background: linear-gradient(135deg, #6366f1, #ec4899, #0ea5e9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* RIGHT CONTENT */
+.content {
+    overflow-y: auto;
+    padding-right: 10px;
+    padding-top: 60px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+}
+
+.content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.3);
+    border-radius: 10px;
+}
+
+/* GLASSMORPHISM CARDS */
+.card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 24px;
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    box-shadow: 
+        0 8px 32px rgba(99, 102, 241, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #6366f1;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+}
+
+/* INPUTS */
+input, textarea {
+    width: 100%;
+    padding: 14px 16px;
+    margin-top: 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    outline: none;
+    background: rgba(255, 255, 255, 0.8);
+    color: #1e293b;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+input::placeholder, textarea::placeholder {
+    color: #94a3b8;
+}
+
+input:focus, textarea:focus {
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 
+        0 0 0 3px rgba(99, 102, 241, 0.1),
+        0 4px 20px rgba(99, 102, 241, 0.1);
+    background: #fff;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* BUTTONS */
+button {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 14px;
+    cursor: pointer;
+    margin-top: 16px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 4px 15px rgba(99, 102, 241, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 25px rgba(99, 102, 241, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+button:hover::before {
+    opacity: 1;
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* LOGOUT BUTTON */
+.logout-btn {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
+    padding: 12px 20px;
+    font-size: 13px;
+    margin-top: 0;
+}
+
+.logout-btn:hover {
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.45);
+}
+
+/* NOTES GRID */
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    padding-bottom: 24px;
+}
+
+/* NOTE CARD */
+.note {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+    backdrop-filter: blur(20px);
+    padding: 28px;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.note::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.note:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(99, 102, 241, 0.2);
+    box-shadow: 
+        0 20px 50px rgba(99, 102, 241, 0.15),
+        0 0 40px rgba(99, 102, 241, 0.05);
+}
+
+.note:hover::before {
+    opacity: 1;
+}
+
+.note b {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.note p {
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+    flex-grow: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.note small {
+    display: inline-flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    font-size: 12px;
+    color: #8b5cf6;
+    padding-top: 16px;
+    border-top: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+/* MODAL */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.modal-box {
+    width: 90%;
+    max-width: 600px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+    backdrop-filter: blur(40px);
+    padding: 32px;
+    border-radius: 28px;
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    box-shadow: 
+        0 25px 80px rgba(99, 102, 241, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-box h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.modal-box .btn-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.modal-box button {
+    flex: 1;
+}
+
+.modal-box button:nth-child(2) {
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+}
+
+.modal-box button:nth-child(3) {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+    box-shadow: none;
+}
+
+.modal-box button:nth-child(3):hover {
+    background: rgba(99, 102, 241, 0.15);
+    box-shadow: none;
+}
+
+/* DELETE CONFIRMATION MODAL */
+.confirm-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+}
+
+.confirm-box {
+    width: 90%;
+    max-width: 400px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+    backdrop-filter: blur(40px);
+    padding: 32px;
+    border-radius: 24px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    box-shadow: 
+        0 25px 80px rgba(239, 68, 68, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+}
+
+.confirm-box .warning-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(249, 115, 22, 0.1));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 28px;
+}
+
+.confirm-box h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #ef4444;
+}
+
+.confirm-box p {
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.confirm-box .btn-group {
+    display: flex;
+    gap: 12px;
+}
+
+.confirm-box button {
+    flex: 1;
+    margin-top: 0;
+}
+
+.confirm-box .cancel-btn {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+    box-shadow: none;
+}
+
+.confirm-box .cancel-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    box-shadow: none;
+}
+
+.confirm-box .delete-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
+}
+
+.confirm-box .delete-btn:hover {
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.45);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .app {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+    
+    .sidebar {
+        position: relative;
+    }
+    
+    .logout-btn {
+        top: 16px;
+        right: 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<a href="/logout">
+    <button class="logout-btn">🚪 Logout</button>
+</a>
+
+<div class="app">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo"><span>✦ My Notes</span></div>
+        
+        <div class="card">
+            <h3>✦ Create Note</h3>
+            <input id="title" placeholder="Title">
+            <textarea id="content" placeholder="What's on your mind?"></textarea>
+            <input id="tags" placeholder="Tags (comma separated)">
+            <button onclick="addNote()">+ Add Note</button>
+        </div>
+
+        <div class="card">
+            <h3>⌕ Search</h3>
+            <input id="search" placeholder="Search notes..." oninput="applyFilters()">
+        </div>
+    </div>
+
+    <!-- RIGHT CONTENT -->
+    <div class="content">
+        <div class="notes-grid" id="notes"></div>
+    </div>
+
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal" id="focusOverlay" onclick="if(event.target === this) closeFocus()">
+    <div class="modal-box">
+        <h3>Edit Note</h3>
+        <input id="f_title" placeholder="Title">
+        <textarea id="f_content" placeholder="Content"></textarea>
+        <input id="f_tags" placeholder="Tags">
+        <div class="btn-group">
+            <button onclick="saveFocus()">✓ Save</button>
+            <button onclick="showDeleteConfirm()">✕ Delete</button>
+            <button onclick="closeFocus()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div class="confirm-modal" id="deleteConfirm" onclick="if(event.target === this) hideDeleteConfirm()">
+    <div class="confirm-box">
+        <div class="warning-icon">⚠️</div>
+        <h3>Delete Note?</h3>
+        <p>This action cannot be undone. Are you sure you want to permanently delete this note?</p>
+        <div class="btn-group">
+            <button class="cancel-btn" onclick="hideDeleteConfirm()">Cancel</button>
+            <button class="delete-btn" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let notes = [];
+let currentNoteId = null;
+
+const $ = (id) => document.getElementById(id);
+
+async function fetchNotes(){
+    const res = await fetch("/notes");
+    notes = await res.json();
+    applyFilters();
+}
+
+function applyFilters(){
+    const q = $("search").value.toLowerCase();
+    let filtered = notes.filter(n =>
+        (n.title||"").toLowerCase().includes(q) ||
+        (n.content||"").toLowerCase().includes(q) ||
+        (n.tags||[]).join(" ").toLowerCase().includes(q)
+    );
+    render(filtered);
+}
+
+function render(list){
+    $("notes").innerHTML = list.map(n => `
+        <div class="note" onclick="openNote('${n.id}')">
+            <div>
+                <b>${n.title || "Untitled"}</b>
+                <p>${n.content || ""}</p>
+            </div>
+            <small>${(n.tags||[]).map(t => `<span>#${t.trim()}</span>`).join("")}</small>
+        </div>
+    `).join("");
+}
+
+async function addNote(){
+    await fetch("/notes",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            title: $("title").value,
+            content: $("content").value,
+            tags: $("tags").value
+        })
+    });
+    $("title").value="";
+    $("content").value="";
+    $("tags").value="";
+    fetchNotes();
+}
+
+function openNote(id){
+    const note = notes.find(n => n.id === id);
+    if(!note) return;
+    currentNoteId = id;
+    $("f_title").value = note.title || "";
+    $("f_content").value = note.content || "";
+    $("f_tags").value = (note.tags||[]).join(", ");
+    $("focusOverlay").style.display = "flex";
+}
+
+function closeFocus(){
+    $("focusOverlay").style.display = "none";
+}
+
+async function saveFocus(){
+    await fetch("/notes/"+currentNoteId,{
+        method:"PUT",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            title: $("f_title").value,
+            content: $("f_content").value,
+            tags: $("f_tags").value
+        })
+    });
+    closeFocus();
+    fetchNotes();
+}
+
+// Show delete confirmation modal
+function showDeleteConfirm(){
+    $("deleteConfirm").style.display = "flex";
+}
+
+// Hide delete confirmation modal
+function hideDeleteConfirm(){
+    $("deleteConfirm").style.display = "none";
+}
+
+// Confirm and execute delete
+async function confirmDelete(){
+    await fetch("/notes/"+currentNoteId,{ method:"DELETE" });
+    hideDeleteConfirm();
+    closeFocus();
+    fetchNotes();
+}
+
+fetchNotes();
+</script>
+
+</body>
+</html>
