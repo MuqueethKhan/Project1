@@ -4,7 +4,7 @@
 <title>Notes</title>
 
 <style>
-@import url('[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap)');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 * {
     margin: 0;
@@ -253,6 +253,131 @@ button:active {
     margin-bottom: 12px;
 }
 
+/* FLIP CARD LOGIC */
+/* ADD TO YOUR EXISTING CSS */
+.note {
+    background: transparent !important;
+    perspective: 1000px;
+    border: none !important;
+    box-shadow: none !important;
+    /* Changed to fixed height to prevent "out of bounds" growth */
+    height: 350px; 
+    margin-bottom: 10px;
+}
+
+.note-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.note.flipped .note-inner {
+    transform: rotateY(180deg);
+}
+
+.note-front, .note-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 24px;
+    padding: 24px;
+    background: white;
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08);
+    /* Prevent any child element from leaking out */
+    overflow: hidden; 
+}
+
+.note-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(145deg, #ffffff, #f8fafc);
+}
+
+.note-img {
+    width: calc(100% + 48px);
+    margin: -24px -24px 12px -24px;
+    height: 160px;
+    object-fit: cover;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.view-link {
+    margin-top: auto; /* Pushes button to bottom of card */
+    padding: 10px 0;
+    color: #6366f1;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px dashed rgba(99, 102, 241, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.view-link:hover {
+    background: rgba(99, 102, 241, 0.1);
+    letter-spacing: 1.5px;
+    border-style: solid;
+    color: #4f46e5;
+}
+
+.view-link::after {
+    content: '→';
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+.view-link1{
+    margin-top: auto; /* Pushes button to bottom of card */
+    padding: 10px 0;
+    color: #6366f1;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px dashed rgba(99, 102, 241, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-shrink: 0;
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.view-link:hover::after {
+    transform: translateX(4px);
+}
+
+/* Back-of-card button for Edit/Delete */
+.view-btn {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    width: 100%;
+}
 .note p {
     color: #64748b;
     font-size: 14px;
@@ -466,7 +591,12 @@ button:active {
             <input id="title" placeholder="Title">
             <textarea id="content" placeholder="What's on your mind?"></textarea>
             <input id="tags" placeholder="Tags (comma separated)">
+            <label style="display:block; margin-top:12px; font-size:12px; color:#6366f1; font-weight:600;">
+        Upload Image:
+        <input type="file" id="image_file" accept="image/*" style="border:none; padding:5px 0; background:transparent;">
+    </label>
             <button onclick="addNote()">+ Add Note</button>
+            
         </div>
 
         <div class="card">
@@ -477,6 +607,12 @@ button:active {
 
     <!-- RIGHT CONTENT -->
     <div class="content">
+        <div style="margin-bottom: 30px; padding: 0 10px;">
+    <h2 style="font-size: 32px; font-weight: 800; color: #1e293b;">
+        {{ greeting }}, <span style="background: linear-gradient(135deg, #6366f1, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ name }}</span>! ✨
+    </h2>
+    <p id="time-quote" style="color: #64748b; font-size: 16px; margin-top: 6px;"></p>
+</div>
         <div class="notes-grid" id="notes"></div>
     </div>
 
@@ -532,31 +668,69 @@ function applyFilters(){
     render(filtered);
 }
 
-function render(list){
-    $("notes").innerHTML = list.map(n => `
-        <div class="note" onclick="openNote('${n.id}')">
-            <div>
-                <b>${n.title || "Untitled"}</b>
-                <p>${n.content || ""}</p>
+// 1. Updated Render for Flip and Image
+function render(list) {
+    $("notes").innerHTML = list.map(n => {
+        // Ensure tags is always an array even if it's a string from the DB
+        const tagArray = Array.isArray(n.tags) ? n.tags : (n.tags ? n.tags.split(',') : []);
+        
+        return `
+        <div class="note" id="note-${n.id}">
+            <div class="note-inner">
+                <div class="note-front" onclick="toggleFlip('${n.id}')">
+                   ${n.image_path && `<img src="/static/uploads/${n.image_path}" class="note-img" onerror="this.style.display='none'">`}
+                    <b>${n.title || "Untitled"}</b>
+                    <small>${tagArray.map(t => `<span>#${t.trim()}</span>`).join(" ")}</small>
+                    <div class="view-link">VIEW</div>
+                </div>
+                <div class="note-back">
+                    <p style="flex-grow:1; overflow-y:auto;">${n.content || ""}</p>
+                    <button class="view-btn" onclick="event.stopPropagation(); openNote('${n.id}')">
+                        ⚙️ Manage
+                    </button>
+                    
+<div class="view-link1" onclick="event.stopPropagation(); toggleFlip('${n.id}')" style="border:none; background:none;">
+    ← BACK
+</div>
+                </div>
             </div>
-            <small>${(n.tags||[]).map(t => `<span>#${t.trim()}</span>`).join("")}</small>
-        </div>
-    `).join("");
+        </div>`;
+    }).join("");
 }
 
+// 2. New Flip Function
+function toggleFlip(id) {
+    document.getElementById(`note-${id}`).classList.toggle('flipped');
+}
+
+// 3. Updated addNote (Add Image Input to your sidebar HTML first!)
+// REPLACE your current addNote function with this
 async function addNote(){
-    await fetch("/notes",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-            title: $("title").value,
-            content: $("content").value,
-            tags: $("tags").value
-        })
+    const formData = new FormData();
+    formData.append("title", $("title").value);
+    formData.append("content", $("content").value);
+    formData.append("tags", $("tags").value);
+    
+const fileInput = $("image_file");
+
+if (fileInput.files.length > 0) {
+    console.log("Uploading file:", fileInput.files[0]); // DEBUG
+    formData.append("image", fileInput.files[0]);
+} else {
+    console.log("No file selected");
+}
+
+    await fetch("/notes", {
+        method: "POST",
+        body: formData // No Headers needed, browser sets boundary
     });
-    $("title").value="";
-    $("content").value="";
-    $("tags").value="";
+
+    // Clear fields
+    $("title").value = ""; 
+    $("content").value = ""; 
+    $("tags").value = "";
+    fileInput.value = "";
+    
     fetchNotes();
 }
 
@@ -600,11 +774,35 @@ function hideDeleteConfirm(){
 
 // Confirm and execute delete
 async function confirmDelete(){
-    await fetch("/notes/"+currentNoteId,{ method:"DELETE" });
-    hideDeleteConfirm();
-    closeFocus();
-    fetchNotes();
+    if (!currentNoteId) return; // Safety check
+
+    const res = await fetch("/notes/" + currentNoteId, { method: "DELETE" });
+    
+    if (res.ok) {
+        // Remove the note from the local array immediately for a snappy UI
+        notes = notes.filter(n => n.id !== currentNoteId);
+        
+        hideDeleteConfirm();
+        closeFocus();
+        
+        // Refresh the UI
+        applyFilters(); 
+    } else {
+        alert("Failed to delete note.");
+    }
+    
+    currentNoteId = null; // Clear the ID after deletion
 }
+// ADDED DYNAMIC QUOTE LOGIC
+function updateTimeQuote() {
+    const hour = new Date().getHours();
+    const qEl = document.getElementById("time-quote");
+    if(hour < 12) qEl.innerText = "Time to seize the day and capture your brightest ideas.";
+    else if(hour < 18) qEl.innerText = "Hope your afternoon is productive! Keep the momentum going.";
+    else qEl.innerText = "Winding down? Reflection is the key to growth.";
+}
+
+updateTimeQuote(); // Run it on load
 
 fetchNotes();
 </script>
